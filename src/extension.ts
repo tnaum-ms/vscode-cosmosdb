@@ -34,6 +34,7 @@ import { MongoDocumentTreeItem } from './mongo/tree/MongoDocumentTreeItem';
 import { registerPostgresCommands } from './postgres/commands/registerPostgresCommands';
 import { DatabaseResolver } from './resolver/AppResolver';
 import { DatabaseWorkspaceProvider } from './resolver/DatabaseWorkspaceProvider';
+import { MongoVCoreResolver } from './resolver/MongoVCoreResolver';
 import { TableAccountTreeItem } from './table/tree/TableAccountTreeItem';
 import { AttachedAccountSuffix } from './tree/AttachedAccountsTreeItem';
 import { SubscriptionTreeItem } from './tree/SubscriptionTreeItem';
@@ -60,6 +61,8 @@ export async function activateInternal(context: vscode.ExtensionContext, perfSta
         ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.AzureCosmosDb, new DatabaseResolver());
         ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.PostgresqlServersStandard, new DatabaseResolver());
         ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.PostgresqlServersFlexible, new DatabaseResolver());
+
+        ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.MongoVCore, new MongoVCoreResolver());
 
         const workspaceRootTreeItem = (ext.rgApi.workspaceResourceTree as unknown as { _rootTreeItem: AzExtParentTreeItem })._rootTreeItem;
         const databaseWorkspaceProvider = new DatabaseWorkspaceProvider(workspaceRootTreeItem);
