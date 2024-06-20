@@ -5,12 +5,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, GenericTreeItem, IActionContext, ICreateChildImplContext, ISubscriptionContext, callWithTelemetryAndErrorHandling } from "@microsoft/vscode-azext-utils";
+import { AzExtTreeItem, GenericTreeItem, IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling } from "@microsoft/vscode-azext-utils";
 import { AppResource, ResolvedAppResourceBase } from "@microsoft/vscode-azext-utils/hostapi";
 import { getThemeAgnosticIconPath } from "../constants";
 import { IMongoTreeRoot } from "../mongo/tree/IMongoTreeRoot";
 
 import type * as vscode from 'vscode';
+import { createCosmosDBClient } from "../utils/azureClients";
 
 
 export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBase {
@@ -56,27 +57,27 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
     commandArgs?: unknown[] | undefined;
     contextValue?: undefined;
 
-    createChildImpl?(context: ICreateChildImplContext): Promise<AzExtTreeItem> {
-        throw new Error('Method not implemented.');
-    }
-    compareChildrenImpl?(item1: AzExtTreeItem, item2: AzExtTreeItem): number {
-        throw new Error('Method not implemented.');
-    }
-    pickTreeItemImpl?(expectedContextValues: (string | RegExp)[], context: IActionContext): AzExtTreeItem | Promise<AzExtTreeItem | undefined> | undefined {
-        throw new Error('Method not implemented.');
-    }
-    deleteTreeItemImpl?(context: IActionContext): Promise<void> {
-        throw new Error('Method not implemented.');
-    }
-    refreshImpl?(context: IActionContext): Promise<void> {
-        throw new Error('Method not implemented.');
-    }
-    isAncestorOfImpl?(contextValue: string | RegExp): boolean {
-        throw new Error('Method not implemented.');
-    }
-    resolveTooltip?(): Promise<string | vscode.MarkdownString> {
-        throw new Error('Method not implemented.');
-    }
+    // createChildImpl?(context: ICreateChildImplContext): Promise<AzExtTreeItem> {
+    //     throw new Error('Method not implemented.');
+    // }
+    // compareChildrenImpl?(item1: AzExtTreeItem, item2: AzExtTreeItem): number {
+    //     throw new Error('Method not implemented.');
+    // }
+    // pickTreeItemImpl?(expectedContextValues: (string | RegExp)[], context: IActionContext): AzExtTreeItem | Promise<AzExtTreeItem | undefined> | undefined {
+    //     throw new Error('Method not implemented.');
+    // }
+    // deleteTreeItemImpl?(context: IActionContext): Promise<void> {
+    //     throw new Error('Method not implemented.');
+    // }
+    // refreshImpl?(context: IActionContext): Promise<void> {
+    //     throw new Error('Method not implemented.');
+    // }
+    // isAncestorOfImpl?(contextValue: string | RegExp): boolean {
+    //     throw new Error('Method not implemented.');
+    // }
+    // resolveTooltip?(): Promise<string | vscode.MarkdownString> {
+    //     throw new Error('Method not implemented.');
+    // }
     contextValuesToAdd?: string[] | undefined;
 
     // overrides ISubscriptionContext with an object that also has Mongo info
@@ -97,9 +98,10 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
             // context.errorHandling.suppressDisplay = true;
             // context.errorHandling.rethrow = true;
 
-            // const resourceGroupName = getResourceGroupFromId(nonNullProp(this._resource, 'id'));
+            //const resourceGroupName = getResourceGroupFromId(nonNullProp(this._resource, 'id'));
 
-            // const client: CosmosDBManagementClient = await createCosmosDBClient({ ...context, ...this._subscription });
+             await createCosmosDBClient({ ...context, ...this._subscription });
+
 
             // // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             // const vCore = await client.mongoClusters.get(resourceGroupName, this._resource.name)
