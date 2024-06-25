@@ -5,14 +5,27 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, GenericTreeItem, IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling } from "@microsoft/vscode-azext-utils";
+
+import { AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { AppResource, ResolvedAppResourceBase } from "@microsoft/vscode-azext-utils/hostapi";
 import { getThemeAgnosticIconPath } from "../constants";
 import { IMongoTreeRoot } from "../mongo/tree/IMongoTreeRoot";
 
-import type * as vscode from 'vscode';
+import { getResourceGroupFromId } from "@microsoft/vscode-azext-azureutils";
+import { ListDatabasesResult, MongoClient } from "mongodb";
+import * as vscode from 'vscode';
 import { createCosmosDBClient } from "../utils/azureClients";
+import { localize } from "../utils/localize";
+import { IAuthenticateWizardContext } from "../vCore/wizards/authenticate/IAuthenticateWizardContext";
+import { ProvidePasswordStep } from "../vCore/wizards/authenticate/ProvidePasswordStep";
+import { SelectUserNameStep } from "../vCore/wizards/authenticate/SelectUserNameStep";
 
+
+
+export interface IDatabaseInfo {
+    name?: string;
+    empty?: boolean;
+}
 
 export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBase {
 
@@ -93,30 +106,74 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
         return false;
     }
 
+
+
     public async loadMoreChildrenImpl(_clearCache: boolean): Promise<AzExtTreeItem[]> {
         const result = await callWithTelemetryAndErrorHandling('vCore.loadMoreChildrenImpl', async (context: IActionContext): Promise<AzExtTreeItem[]> => {
-            // context.errorHandling.suppressDisplay = true;
-            // context.errorHandling.rethrow = true;
+            context.errorHandling.suppressDisplay = true;
+            context.errorHandling.rethrow = true;
 
-            //const resourceGroupName = getResourceGroupFromId(nonNullProp(this._resource, 'id'));
+            void vscode.window.showInformationMessage('Loading Cluster Details for ' + this._resource.name + '...');
+            const resourceGroupName = getResourceGroupFromId(nonNullProp(this._resource, 'id'));
 
-             await createCosmosDBClient({ ...context, ...this._subscription });
+            const client = await createCosmosDBClient({ ...context, ...this._subscription });
+            const mongoCluster = await client.mongoClusters.get(resourceGroupName, this._resource.name);
+
+            const login = mongoCluster.administratorLogin;
+            const cString = mongoCluster.connectionString;
+
+            const cStrings = await client.mongoClusters.listConnectionStrings(resourceGroupName, this._resource.name);
+
+            const wizardContext: IAuthenticateWizardContext = { ...context,
+                adminUserName: login as string,
+                otherUserNames: ['user1', 'user2', 'user3'],
+                resourceName: this._resource.name
+             };
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const wizard = new AzureWizard(wizardContext, {
+                promptSteps: [new SelectUserNameStep(), new ProvidePasswordStep()],
+                title : localize('authenticatevCoreCluster', 'Authenticate to your vCore Cluster')
+            });
+
+            await wizard.prompt();
+
+            void vscode.window.showInformationMessage('Connecting to vCore...');
+
+            const cStringUser = cString?.replace('<user>', nonNullProp(wizardContext, 'selectedUserName'));
+            const cStringPassword = cStringUser?.replace('<password>', nonNullProp(wizardContext, 'password'));
+
+
+            const mongoClient: MongoClient | undefined = await MongoClient.connect(cStringPassword as string);
+
+            void vscode.window.showInformationMessage('Listing databases...');
+
+            const rDatabases: ListDatabasesResult = await mongoClient.db('test').admin().listDatabases();
+            const databases: IDatabaseInfo[] = rDatabases.databases;
+
+
+            return databases.map(
+                database => new GenericTreeItem(undefined, {
+                    contextValue: database.name as string,
+                    label: database.name as string
+                })
+            );
 
 
             // // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             // const vCore = await client.mongoClusters.get(resourceGroupName, this._resource.name)
             // //.mongoClusters.get(resourceGroupName, 'asdf');
 
-            const result: AzExtTreeItem[] = [];
-            result.push(new GenericTreeItem(undefined, {
-                contextValue: 'cosmosDBAttachEmulator',
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-                label: 'list databases...',
-                commandId: 'cosmosDB.attachEmulator',
-                includeInTreeItemPicker: true
-            }));
+            // const result: AzExtTreeItem[] = [];
+            // result.push(new GenericTreeItem(undefined, {
+            //     contextValue: 'cosmosDBAttachEmulator',
+            //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            //     label: mongoCluster.location,
+            //     commandId: 'cosmosDB.attachEmulator',
+            //     includeInTreeItemPicker: true
+            // }));
 
-            return result;
+            // return result;
 
         });
 
