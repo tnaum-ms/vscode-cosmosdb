@@ -19,6 +19,7 @@ export class ProvidePasswordStep extends AzureWizardPromptStep<IAuthenticateWiza
         });
 
         context.password = passwordTemp.trim();
+        context.valuesToMask.push(context.password);
     }
 
     public shouldPrompt(): boolean {
