@@ -31,7 +31,13 @@ export class SelectUserNameStep extends AzureWizardPromptStep<IAuthenticateWizar
         context.selectedUserName = res.label;
     }
 
+    public async configureBeforePrompt(wizardContext: IAuthenticateWizardContext): Promise<void> {
+        if (wizardContext.otherUserNames.length === 0) {
+            wizardContext.selectedUserName = wizardContext.adminUserName;
+        }
+    }
+
     public shouldPrompt(context: IAuthenticateWizardContext): boolean {
-        return context.otherUserNames.length > 0;
+        return !context.selectedUserName;
     }
 }

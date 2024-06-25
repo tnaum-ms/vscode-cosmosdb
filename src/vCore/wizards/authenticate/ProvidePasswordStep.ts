@@ -5,6 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep } from "@microsoft/vscode-azext-utils";
+import { localize } from "../../../utils/localize";
 import { IAuthenticateWizardContext } from "./IAuthenticateWizardContext";
 
 export class ProvidePasswordStep extends AzureWizardPromptStep<IAuthenticateWizardContext> {
@@ -13,6 +14,7 @@ export class ProvidePasswordStep extends AzureWizardPromptStep<IAuthenticateWiza
             //title: 'Authenticate to your vCore Cluster',
             prompt: `You need to provide the password for '${context.selectedUserName}' in order to continue. Your password will not be stored.`,
             placeHolder: `Password for ${context.selectedUserName}@${context.resourceName}`,
+            title : localize('authenticatevCoreCluster', 'Authenticate to your vCore Cluster'),
             password: true
         });
 
