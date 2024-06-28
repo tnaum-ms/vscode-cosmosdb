@@ -25,6 +25,13 @@ import { SelectUserNameStep } from "../vCore/wizards/authenticate/SelectUserName
 export interface IDatabaseInfo {
     name?: string;
     empty?: boolean;
+    version?: string;
+}
+
+export interface IMongoVCoreAccountDetails {
+    name: string,
+    version?: string,
+    sku?: string
 }
 
 export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBase {
@@ -40,16 +47,16 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
 
     private _root: IMongoTreeRoot;
 
-    constructor(subContext: ISubscriptionContext, id: string, label: string, resource: AppResource) {
+    constructor(subContext: ISubscriptionContext, id: string, accountDetails: IMongoVCoreAccountDetails, resource: AppResource) {
         //super(undefined);
         //this.subscriptionContext = subContext;
         this.id = id;
-        this.label = label;
+        this.label = accountDetails.name;
         this._resource = resource;
         this._subscription = subContext;
+        this.description = `${accountDetails.sku} | v${accountDetails.version}`;
         //this.connectionString = connectionString;
         //this._root = { isEmulator };
-        this.description = "(count databases...)";
         //this.valuesToMask.push(connectionString);
 
     }
@@ -122,7 +129,6 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
             const login = mongoCluster.administratorLogin;
             const cString = mongoCluster.connectionString;
 
-            const cStrings = await client.mongoClusters.listConnectionStrings(resourceGroupName, this._resource.name);
 
             const wizardContext: IAuthenticateWizardContext = { ...context,
                 adminUserName: login as string,
@@ -155,26 +161,10 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
             return databases.map(
                 database => new GenericTreeItem(undefined, {
                     contextValue: database.name as string,
-                    label: database.name as string
+                    label: database.name as string,
+                    description: 'my desc'
                 })
             );
-
-
-            // // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            // const vCore = await client.mongoClusters.get(resourceGroupName, this._resource.name)
-            // //.mongoClusters.get(resourceGroupName, 'asdf');
-
-            // const result: AzExtTreeItem[] = [];
-            // result.push(new GenericTreeItem(undefined, {
-            //     contextValue: 'cosmosDBAttachEmulator',
-            //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            //     label: mongoCluster.location,
-            //     commandId: 'cosmosDB.attachEmulator',
-            //     includeInTreeItemPicker: true
-            // }));
-
-            // return result;
-
         });
 
         if (result === undefined) {
