@@ -6,16 +6,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 
-import { AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling, nonNullProp } from "@microsoft/vscode-azext-utils";
+import { AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling, nonNullProp, nonNullValue } from "@microsoft/vscode-azext-utils";
 import { AppResource, ResolvedAppResourceBase } from "@microsoft/vscode-azext-utils/hostapi";
 import { getThemeAgnosticIconPath } from "../constants";
 import { IMongoTreeRoot } from "../mongo/tree/IMongoTreeRoot";
+
+import { createHttpHeaders } from "@azure/core-rest-pipeline";
+
 
 import { getResourceGroupFromId } from "@microsoft/vscode-azext-azureutils";
 import { ListDatabasesResult, MongoClient } from "mongodb";
 import * as vscode from 'vscode';
 import { createCosmosDBClient } from "../utils/azureClients";
 import { localize } from "../utils/localize";
+import { IVCoreClusterUser } from "../vCore/IVCoreClusterUser";
 import { IAuthenticateWizardContext } from "../vCore/wizards/authenticate/IAuthenticateWizardContext";
 import { ProvidePasswordStep } from "../vCore/wizards/authenticate/ProvidePasswordStep";
 import { SelectUserNameStep } from "../vCore/wizards/authenticate/SelectUserNameStep";
@@ -129,10 +133,28 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
             const login = mongoCluster.administratorLogin;
             const cString = mongoCluster.connectionString;
 
+            // load users
+            const getUsersResponse = await client.sendRequest(
+                {
+                    method: 'GET',
+                    url: `https://management.azure.com/subscriptions/${this._subscription.subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/mongoClusters/${this._resource.name}/users?api-version=2024-03-01-preview`,
+                    headers:  createHttpHeaders({ 'Content-Type': 'application/json'} ),
+                    timeout: 0,
+                    withCredentials: false,
+                    requestId: ""
+                },
+            );
+
+            const clusterUsers: IVCoreClusterUser[] = nonNullProp(JSON.parse(nonNullValue(getUsersResponse.bodyAsText, '[]') as string), 'value') as IVCoreClusterUser[];
+
+            const clusterUsersNamesArray: string[] = clusterUsers
+                .filter((user) => user.name !== mongoCluster.administratorLogin)
+                .map(user => user.name);
+
 
             const wizardContext: IAuthenticateWizardContext = { ...context,
                 adminUserName: login as string,
-                otherUserNames: ['user1', 'user2', 'user3'],
+                otherUserNames: clusterUsersNamesArray,
                 resourceName: this._resource.name
              };
 
