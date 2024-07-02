@@ -3,26 +3,30 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CosmosDBManagementClient } from "@azure/arm-cosmosdb";
+import { uiUtils } from "@microsoft/vscode-azext-azureutils";
 import { IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling } from "@microsoft/vscode-azext-utils";
 import { AppResource, AppResourceResolver } from "@microsoft/vscode-azext-utils/hostapi";
+import { createCosmosDBClient } from "../utils/azureClients";
 import { IMongoVCoreAccountDetails, ResolvedMongoVCoreAccountResource } from "./ResolvedMongoVCoreAccountResource";
 
 
 const supportedResourceTypes = [
     'microsoft.documentdb/mongoclusters'
 ];
-// only contains the fields we're currently interested in
-// interface IMongoVCoreDetails {
-//     properties : {
-//         serverVersion: string,
-//         nodeGroupSpecs: [ { sku: string} ]
-//     }
-// }
+
+
+//only contains the fields we're currently interested in
+interface IMongoVCoreDetails {
+    serverVersion: string,
+    sku: string
+}
 
 export class MongoVCoreResolver implements AppResourceResolver {
 
+    private static _detailsMap: Map<string, IMongoVCoreDetails> = new Map<string, IMongoVCoreDetails>();
 
-//    private static _coreClient : ServiceClient | undefined = undefined;
+    private static _cosmosDBClient : CosmosDBManagementClient | undefined = undefined;
 
     public async resolveResource(subContext: ISubscriptionContext, resource: AppResource): Promise<ResolvedMongoVCoreAccountResource | null | undefined> {
         return await callWithTelemetryAndErrorHandling('resolveResource', async (context: IActionContext) => {
@@ -34,15 +38,24 @@ export class MongoVCoreResolver implements AppResourceResolver {
                 // or move it to a more appropriate location in case we won't be able to remove this code
                 // start of temporary code
 
-                // fun experiment, but way too slow as we have a roundtrip on every resource
+                // fun experiment:
 
-                // if (MongoVCoreResolver._coreClient === undefined) {
-                //     MongoVCoreResolver._coreClient = new ServiceClient({
-                //         baseUri: 'https://management.azure.com',
-                //         credential: subContext.credentials,
-                //         credentialScopes: 'https://management.azure.com/.default'
-                //     });
-                // }
+                if (MongoVCoreResolver._cosmosDBClient === undefined) {
+                    MongoVCoreResolver._cosmosDBClient = await createCosmosDBClient({...context, ...subContext});
+                    const allResourcesWithDetails = await uiUtils.listAllIterator(MongoVCoreResolver._cosmosDBClient.mongoClusters.list());
+
+                    // a map for quick lookup
+                    // TODO: P1: this is a temporary solution, I need to add expiration to this cache, any TS-built in solution?
+                    allResourcesWithDetails.forEach((resource) => {
+                        if (resource.nodeGroupSpecs) {
+                            MongoVCoreResolver._detailsMap.set(resource.id as string,
+                                {serverVersion: resource.serverVersion as string,
+                                sku: resource.nodeGroupSpecs[0]?.sku as string});
+                        }
+                    });
+                }
+
+
 
                 // // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 // const httpHeaders: HttpHeaders =  createHttpHeaders({ 'Content-Type': 'application/json' });
@@ -75,8 +88,8 @@ export class MongoVCoreResolver implements AppResourceResolver {
 
                 const vCoreDetails: IMongoVCoreAccountDetails = {
                     name: resource.name,
-                    version: 'X.0',
-                    sku: 'MXX'
+                    version: MongoVCoreResolver._detailsMap.get(resource.id)?.serverVersion || undefined,
+                    sku: MongoVCoreResolver._detailsMap.get(resource.id)?.sku || undefined
                 }
 
                 switch (resource.type.toLowerCase()) {
