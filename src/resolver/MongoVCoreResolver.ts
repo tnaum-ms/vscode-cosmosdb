@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CosmosDBManagementClient } from "@azure/arm-cosmosdb";
 import { uiUtils } from "@microsoft/vscode-azext-azureutils";
-import { IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling } from "@microsoft/vscode-azext-utils";
+import { IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { AppResource, AppResourceResolver } from "@microsoft/vscode-azext-utils/hostapi";
 import { createCosmosDBClient } from "../utils/azureClients";
 import { IMongoVCoreAccountDetails, ResolvedMongoVCoreAccountResource } from "./ResolvedMongoVCoreAccountResource";
@@ -19,77 +18,51 @@ const supportedResourceTypes = [
 //only contains the fields we're currently interested in
 interface IMongoVCoreDetails {
     serverVersion: string,
-    sku: string
+    sku?: string
 }
 
 export class MongoVCoreResolver implements AppResourceResolver {
 
-    private static _detailsMap: Map<string, IMongoVCoreDetails> = new Map<string, IMongoVCoreDetails>();
-
-    private static _cosmosDBClient : CosmosDBManagementClient | undefined = undefined;
+    private vCoreDetailsCacheUpdateRequested = true;
+    private vCoreDetailsCache: Map<string, IMongoVCoreDetails> = new Map<string, IMongoVCoreDetails>();
 
     public async resolveResource(subContext: ISubscriptionContext, resource: AppResource): Promise<ResolvedMongoVCoreAccountResource | null | undefined> {
         return await callWithTelemetryAndErrorHandling('resolveResource', async (context: IActionContext) => {
             try {
                 console.log('🚀 Resolving: ' + resource.id);
 
-                // TODO: this is only temporary until we have a better way to pull details potentially hidden in the 'resource' variable
-                // once we have a better way to pull details from the resource, we can remove this switch statement
-                // or move it to a more appropriate location in case we won't be able to remove this code
-                // start of temporary code
+                /**
+                 * todo: discuss:
+                 * this looks nice, we pull all the vCore accounts and cache them when needed,
+                 * and cache them for 10 seconds. Then we clear the cache to conserve memory.
+                 * However, the 'resolveResource' functions is declared as async, so can it be called in parallel?
+                 * If so, there is a problem here. JS/TS and race conditions? Is this a thing?
+                 */
+                if (this.vCoreDetailsCacheUpdateRequested) {
+                    this.vCoreDetailsCacheUpdateRequested = false;
 
-                // fun experiment:
+                    setTimeout(() => {
+                        this.vCoreDetailsCache.clear();
+                        this.vCoreDetailsCacheUpdateRequested = true;
+                    }, 1000 * 10); // clear cache after 10 seconds == keep cache for 10 seconds
 
-                if (MongoVCoreResolver._cosmosDBClient === undefined) {
-                    MongoVCoreResolver._cosmosDBClient = await createCosmosDBClient({...context, ...subContext});
-                    const allResourcesWithDetails = await uiUtils.listAllIterator(MongoVCoreResolver._cosmosDBClient.mongoClusters.list());
+                    const vCoreManagementClient = await createCosmosDBClient({...context, ...subContext});
+                    const vCoreAccounts = await uiUtils.listAllIterator(vCoreManagementClient.mongoClusters.list());
 
-                    // a map for quick lookup
-                    // TODO: P1: this is a temporary solution, I need to add expiration to this cache, any TS-built in solution?
-                    allResourcesWithDetails.forEach((resource) => {
-                        if (resource.nodeGroupSpecs) {
-                            MongoVCoreResolver._detailsMap.set(resource.id as string,
-                                {serverVersion: resource.serverVersion as string,
-                                sku: resource.nodeGroupSpecs[0]?.sku as string});
-                        }
+                    vCoreAccounts.map(vCoreAccount => {
+                            this.vCoreDetailsCache.set(nonNullProp(vCoreAccount, 'id'),
+                                {
+                                    serverVersion: vCoreAccount.serverVersion as string,
+                                    sku: vCoreAccount.nodeGroupSpecs !== undefined
+                                     ? vCoreAccount.nodeGroupSpecs[0]?.sku as string : undefined
+                                });
                     });
                 }
 
-
-
-                // // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                // const httpHeaders: HttpHeaders =  createHttpHeaders({ 'Content-Type': 'application/json' });
-
-                // const resourceGroupName = getResourceGroupFromId(nonNullProp(resource, 'id'));
-
-                // // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                // const vCoreDetailsString = await MongoVCoreResolver._coreClient.sendRequest(
-                //     {
-                //         method: 'GET',
-                //         url: `https://management.azure.com/subscriptions/${subContext.subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/mongoClusters/${resource.name}?api-version=2024-03-01-preview`,
-                //         timeout: 0,
-                //         headers: httpHeaders,
-                //         withCredentials: false,
-                //         requestId: ""
-                //     },
-                // );
-
-                // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unused-vars
-                // const vCoreDetailsJSON: IMongoVCoreDetails = JSON.parse(vCoreDetailsString.bodyAsText as string);
-
-                // const vCoreDetails: IMongoVCoreAccountDetails = {
-                //     name: resource.name,
-                //     resourceGroup: resourceGroupName,
-                //     version: vCoreDetailsJSON.properties.serverVersion,
-                //     sku: vCoreDetailsJSON.properties.nodeGroupSpecs[0].sku
-                // };
-
-                // end of temporary code
-
                 const vCoreDetails: IMongoVCoreAccountDetails = {
                     name: resource.name,
-                    version: MongoVCoreResolver._detailsMap.get(resource.id)?.serverVersion || undefined,
-                    sku: MongoVCoreResolver._detailsMap.get(resource.id)?.sku || undefined
+                    version: this.vCoreDetailsCache.get(resource.id)?.serverVersion || undefined,
+                    sku: this.vCoreDetailsCache.get(resource.id)?.sku || undefined
                 }
 
                 switch (resource.type.toLowerCase()) {
