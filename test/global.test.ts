@@ -7,6 +7,11 @@ import { TestOutputChannel, TestUserInput } from '@microsoft/vscode-azext-dev';
 import * as vscode from 'vscode';
 import { ext, registerOnActionStartHandler } from '../extension.bundle';
 
+const longRunningLocalTestsEnabled: boolean = !/^(false|0)?$/i.test(process.env.AzCode_EnableLongRunningTestsLocal || '');
+const longRunningRemoteTestsEnabled: boolean = !/^(false|0)?$/i.test(process.env.AzCode_UseAzureFederatedCredentials || '');
+
+export const longRunningTestsEnabled: boolean = longRunningLocalTestsEnabled || longRunningRemoteTestsEnabled;
+
 // Runs before all tests
 suiteSetup(async function (this: Mocha.Context): Promise<void> {
     this.timeout(2 * 60 * 1000);
