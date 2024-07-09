@@ -35,7 +35,12 @@ export interface IDatabaseInfo {
 export interface IMongoVCoreAccountDetails {
     name: string,
     version?: string,
-    sku?: string
+    sku?: string,
+    diskSize?: number,
+    provisioningState?: string,
+    clusterStatus?: string,
+    publicNetworkAccess?: string,
+    location?: string
 }
 
 export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBase {
@@ -58,7 +63,18 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
         this.label = accountDetails.name;
         this._resource = resource;
         this._subscription = subContext;
-        this.description = `${accountDetails.sku} | v${accountDetails.version}`;
+        this.description = `(${accountDetails.sku} + ${accountDetails.diskSize}GB)`;
+        this.tooltip =
+            `SKU: ${accountDetails.sku}\n` +
+            `Disk Size: ${accountDetails.diskSize}GB\n` +
+            `Version: v${accountDetails.version}\n` +
+            `\n` +
+            `Resource Group: ${getResourceGroupFromId(resource.id)}\n` +
+            `Location: ${accountDetails.location}\n` +
+            `\n` +
+            `Provisioning State: ${accountDetails.provisioningState}\n` +
+            `Cluster Status: ${accountDetails.clusterStatus}\n`;
+
         //this.connectionString = connectionString;
         //this._root = { isEmulator };
         //this.valuesToMask.push(connectionString);

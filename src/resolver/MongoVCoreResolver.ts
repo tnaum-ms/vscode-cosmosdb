@@ -19,6 +19,11 @@ const supportedResourceTypes = [
 interface IMongoVCoreDetails {
     serverVersion: string,
     sku?: string
+    diskSize?: number,
+    provisioningState?: string,
+    clusterStatus?: string,
+    publicNetworkAccess?: string,
+    location?: string
 }
 
 export class MongoVCoreResolver implements AppResourceResolver {
@@ -54,15 +59,24 @@ export class MongoVCoreResolver implements AppResourceResolver {
                                 {
                                     serverVersion: vCoreAccount.serverVersion as string,
                                     sku: vCoreAccount.nodeGroupSpecs !== undefined
-                                     ? vCoreAccount.nodeGroupSpecs[0]?.sku as string : undefined
-                                });
+                                     ? vCoreAccount.nodeGroupSpecs[0]?.sku as string : undefined,
+                                    location: vCoreAccount.location as string,
+                                    diskSize: vCoreAccount.nodeGroupSpecs !== undefined
+                                     ? vCoreAccount.nodeGroupSpecs[0]?.diskSizeGB as number : undefined,
+                                    clusterStatus: vCoreAccount.clusterStatus as string,
+                                    provisioningState: vCoreAccount.provisioningState as string                                });
                     });
                 }
 
+                // todo: this is not really the best way to do this, why not just use the same definition for both? fix this.
                 const vCoreDetails: IMongoVCoreAccountDetails = {
                     name: resource.name,
                     version: this.vCoreDetailsCache.get(resource.id)?.serverVersion || undefined,
-                    sku: this.vCoreDetailsCache.get(resource.id)?.sku || undefined
+                    sku: this.vCoreDetailsCache.get(resource.id)?.sku || undefined,
+                    location: this.vCoreDetailsCache.get(resource.id)?.location || undefined,
+                    diskSize: this.vCoreDetailsCache.get(resource.id)?.diskSize || undefined,
+                    clusterStatus: this.vCoreDetailsCache.get(resource.id)?.clusterStatus || undefined,
+                    provisioningState: this.vCoreDetailsCache.get(resource.id)?.provisioningState || undefined
                 }
 
                 switch (resource.type.toLowerCase()) {
