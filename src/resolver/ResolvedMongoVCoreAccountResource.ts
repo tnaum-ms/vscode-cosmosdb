@@ -6,7 +6,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 
-import { AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling, nonNullProp, nonNullValue } from "@microsoft/vscode-azext-utils";
+import { AzExtTreeItem, AzureWizard, IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling, nonNullProp, nonNullValue } from "@microsoft/vscode-azext-utils";
 import { AppResource, ResolvedAppResourceBase } from "@microsoft/vscode-azext-utils/hostapi";
 import { getThemeAgnosticIconPath } from "../constants";
 import { IMongoTreeRoot } from "../mongo/tree/IMongoTreeRoot";
@@ -15,11 +15,14 @@ import { createHttpHeaders } from "@azure/core-rest-pipeline";
 
 
 import { getResourceGroupFromId } from "@microsoft/vscode-azext-azureutils";
-import { ListDatabasesResult, MongoClient } from "mongodb";
 import * as vscode from 'vscode';
 import { createCosmosDBClient } from "../utils/azureClients";
 import { localize } from "../utils/localize";
+import { CredentialsStore } from "../vCore/CredentialsStore";
 import { IVCoreClusterUser } from "../vCore/IVCoreClusterUser";
+import { VCoreDatabaseTreeItem } from "../vCore/tree/VCoreDatabaseTreeItem";
+import { addAuthenticationDataToConnectionString } from "../vCore/utils/connectionStringHelpers";
+import { VCoreClient, vCoreDatabaseInfo } from "../vCore/VCoreClient";
 import { IAuthenticateWizardContext } from "../vCore/wizards/authenticate/IAuthenticateWizardContext";
 import { ProvidePasswordStep } from "../vCore/wizards/authenticate/ProvidePasswordStep";
 import { SelectUserNameStep } from "../vCore/wizards/authenticate/SelectUserNameStep";
@@ -184,25 +187,18 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
 
             void vscode.window.showInformationMessage('Connecting to vCore...');
 
-            const cStringUser = cString?.replace('<user>', nonNullProp(wizardContext, 'selectedUserName'));
-            const cStringPassword = cStringUser?.replace('<password>', nonNullProp(wizardContext, 'password'));
+            const cStringPassword = addAuthenticationDataToConnectionString(cString as string, nonNullProp(wizardContext, 'selectedUserName'), nonNullProp(wizardContext, 'password'));
+            const clientId = CredentialsStore.setConnectionString(cStringPassword);
 
-
-            const mongoClient: MongoClient | undefined = await MongoClient.connect(cStringPassword as string);
+            const vCoreClient: VCoreClient = await VCoreClient.getClient(clientId);
 
             void vscode.window.showInformationMessage('Listing databases...');
 
-            const rDatabases: ListDatabasesResult = await mongoClient.db('test').admin().listDatabases();
-            const databases: IDatabaseInfo[] = rDatabases.databases;
-
-
-            return databases.map(
-                database => new GenericTreeItem(undefined, {
-                    contextValue: database.name as string,
-                    label: database.name as string,
-                    description: 'my desc'
-                })
-            );
+            return vCoreClient.listDatabases().then((databases: vCoreDatabaseInfo[]) => {
+                return databases.map(
+                    database => new VCoreDatabaseTreeItem(database.name as string, clientId)
+                );
+            });
         });
 
         if (result === undefined) {
