@@ -35,7 +35,8 @@
             "preLaunchTask": "${defaultBuildTask}",
             "env": {
                 "DEBUGTELEMETRY": "v",
-                "NODE_DEBUG": ""
+                "NODE_DEBUG": "",
+                "DEBUG_WEBPACK": "true"
             }
         },
         {

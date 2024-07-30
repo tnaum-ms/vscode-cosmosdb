@@ -34,11 +34,11 @@ import { MongoDocumentTreeItem } from './mongo/tree/MongoDocumentTreeItem';
 import { registerPostgresCommands } from './postgres/commands/registerPostgresCommands';
 import { DatabaseResolver } from './resolver/AppResolver';
 import { DatabaseWorkspaceProvider } from './resolver/DatabaseWorkspaceProvider';
-import { MongoVCoreResolver } from './resolver/MongoVCoreResolver';
 import { TableAccountTreeItem } from './table/tree/TableAccountTreeItem';
 import { AttachedAccountSuffix } from './tree/AttachedAccountsTreeItem';
 import { SubscriptionTreeItem } from './tree/SubscriptionTreeItem';
 import { localize } from './utils/localize';
+import { VCoreExtension } from './vCore/VCoreExtension';
 
 const cosmosDBTopLevelContextValues: string[] = [GraphAccountTreeItem.contextValue, DocDBAccountTreeItem.contextValue, TableAccountTreeItem.contextValue, MongoAccountTreeItem.contextValue];
 
@@ -62,8 +62,6 @@ export async function activateInternal(context: vscode.ExtensionContext, perfSta
         ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.PostgresqlServersStandard, new DatabaseResolver());
         ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.PostgresqlServersFlexible, new DatabaseResolver());
 
-        ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.MongoVCore, new MongoVCoreResolver());
-
         const workspaceRootTreeItem = (ext.rgApi.workspaceResourceTree as unknown as { _rootTreeItem: AzExtParentTreeItem })._rootTreeItem;
         const databaseWorkspaceProvider = new DatabaseWorkspaceProvider(workspaceRootTreeItem);
         ext.rgApi.registerWorkspaceResourceProvider('AttachedDatabaseAccount', databaseWorkspaceProvider);
@@ -74,6 +72,11 @@ export async function activateInternal(context: vscode.ExtensionContext, perfSta
         registerGraphCommands();
         registerPostgresCommands();
         registerMongoCommands();
+
+        // init and activate vCore-support (commands, ...)
+        const vCoreSupport: VCoreExtension = new VCoreExtension();
+        context.subscriptions.push(vCoreSupport); // to be disposed when extension is deactivated.
+        await vCoreSupport.activate();
 
         context.subscriptions.push(vscode.workspace.registerFileSystemProvider(DatabasesFileSystem.scheme, ext.fileSystem));
 

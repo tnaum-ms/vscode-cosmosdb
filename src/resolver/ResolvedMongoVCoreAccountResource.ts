@@ -157,7 +157,7 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
                 {
                     method: 'GET',
                     url: `https://management.azure.com/subscriptions/${this._subscription.subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/mongoClusters/${this._resource.name}/users?api-version=2024-03-01-preview`,
-                    headers:  createHttpHeaders({ 'Content-Type': 'application/json'} ),
+                    headers: createHttpHeaders({ 'Content-Type': 'application/json' }),
                     timeout: 0,
                     withCredentials: false,
                     requestId: ""
@@ -171,16 +171,17 @@ export class ResolvedMongoVCoreAccountResource implements ResolvedAppResourceBas
                 .map(user => user.name);
 
 
-            const wizardContext: IAuthenticateWizardContext = { ...context,
+            const wizardContext: IAuthenticateWizardContext = {
+                ...context,
                 adminUserName: login as string,
                 otherUserNames: clusterUsersNamesArray,
                 resourceName: this._resource.name
-             };
+            };
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const wizard = new AzureWizard(wizardContext, {
                 promptSteps: [new SelectUserNameStep(), new ProvidePasswordStep()],
-                title : localize('authenticatevCoreCluster', 'Authenticate to your vCore Cluster')
+                title: localize('authenticatevCoreCluster', 'Authenticate to your vCore Cluster')
             });
 
             await wizard.prompt();

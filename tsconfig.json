@@ -5,8 +5,10 @@
         "outDir": "out",
         "lib": [
             "es6",
-            "dom"
+            "dom",
+            "dom.iterable"
         ],
+        "jsx": "react-jsx",
         "sourceMap": true,
         "noImplicitThis": true,
         "noImplicitReturns": true,

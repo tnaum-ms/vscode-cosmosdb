@@ -446,6 +446,16 @@
                 "command": "postgreSQL.showPasswordlessWiki",
                 "title": "Learn more about authenticating with Azure Active Directory",
                 "icon": "$(warning)"
+            },
+            {
+                "category": "vCore",
+                "command": "vCore.cmd.hello",
+                "title": "Say Hello!"
+            },
+            {
+                "category": "vCore",
+                "command": "vCore.cmd.webview",
+                "title": "Show WebView"
             }
         ],
         "submenus": [
@@ -1093,6 +1103,7 @@
         "unittest": "mocha ./out/test/unit/**/*.js",
         "update-grammar": "antlr4ts -visitor ./grammar/mongo.g4 -o ./src/mongo/grammar",
         "webpack": "npm run build && gulp webpack-dev",
+        "server": "webpack serve --mode development",
         "webpack-prod": "npm run build && gulp webpack-prod",
         "webpack-profile": "webpack --profile --json --mode production > webpack-stats.json && echo Use http://webpack.github.io/analyse to analyze the stats",
         "all": "npm i && npm run lint && npm test",
@@ -1109,6 +1120,8 @@
         "@types/mocha": "^7.0.2",
         "@types/node": "^14.0.0",
         "@types/pg": "^8.10.2",
+        "@types/react": "^18.3.0",
+        "@types/react-dom": "^18.3.0",
         "@types/vscode": "1.82.0",
         "@typescript-eslint/eslint-plugin": "^4.31.1",
         "@vscode/test-electron": "^2.3.8",
@@ -1125,8 +1138,9 @@
         "ts-node": "^7.0.1",
         "typescript": "^5.5.2",
         "vsce": "^1.87.0",
-        "webpack": "^5.76.0",
-        "webpack-cli": "^4.6.0",
+        "webpack": "^5.93.0",
+        "webpack-cli": "^5.1.4",
+        "webpack-dev-server": "^5.0.4",
         "webpack-log": "^3.0.2"
     },
     "dependencies": {
@@ -1146,6 +1160,8 @@
         "pg": "^8.11.2",
         "pg-connection-string": "^2.6.2",
         "pg-structure": "^7.15.0",
+        "react": "^18.3.0",
+        "react-dom": "^18.3.0",
         "semver": "^7.5.2",
         "underscore": "^1.12.1",
         "vscode-json-languageservice": "^3.0.8",
