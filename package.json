@@ -1096,7 +1096,9 @@
         "webpack-prod": "npm run build && gulp webpack-prod",
         "webpack-profile": "webpack --profile --json --mode production > webpack-stats.json && echo Use http://webpack.github.io/analyse to analyze the stats",
         "all": "npm i && npm run lint && npm test",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "reset": "rm -rf out && rm -rf node_modules && npm install  && npm run link-resapi",
+        "link-resapi": "npm link @microsoft/vscode-azureresources-api"
     },
     "devDependencies": {
         "@azure/arm-resources": "^4.0.0",
