@@ -44,27 +44,35 @@ export class MongoVCoreResolver implements AppResourceResolver {
                  * If so, there is a problem here. JS/TS and race conditions? Is this a thing?
                  */
                 if (this.vCoreDetailsCacheUpdateRequested) {
-                    this.vCoreDetailsCacheUpdateRequested = false;
+                    await callWithTelemetryAndErrorHandling('vCore.resolveResources.cacheUpdate', async (context: IActionContext) => {
+                        try {
+                            this.vCoreDetailsCacheUpdateRequested = false;
 
-                    setTimeout(() => {
-                        this.vCoreDetailsCache.clear();
-                        this.vCoreDetailsCacheUpdateRequested = true;
-                    }, 1000 * 10); // clear cache after 10 seconds == keep cache for 10 seconds
+                            setTimeout(() => {
+                                this.vCoreDetailsCache.clear();
+                                this.vCoreDetailsCacheUpdateRequested = true;
+                            }, 1000 * 10); // clear cache after 10 seconds == keep cache for 10 seconds
 
-                    const vCoreManagementClient = await createCosmosDBClient({...context, ...subContext});
-                    const vCoreAccounts = await uiUtils.listAllIterator(vCoreManagementClient.mongoClusters.list());
+                            const vCoreManagementClient = await createCosmosDBClient({ ...context, ...subContext });
+                            const vCoreAccounts = await uiUtils.listAllIterator(vCoreManagementClient.mongoClusters.list());
 
-                    vCoreAccounts.map(vCoreAccount => {
-                            this.vCoreDetailsCache.set(nonNullProp(vCoreAccount, 'id'),
-                                {
-                                    serverVersion: vCoreAccount.serverVersion as string,
-                                    sku: vCoreAccount.nodeGroupSpecs !== undefined
-                                     ? vCoreAccount.nodeGroupSpecs[0]?.sku as string : undefined,
-                                    location: vCoreAccount.location as string,
-                                    diskSize: vCoreAccount.nodeGroupSpecs !== undefined
-                                     ? vCoreAccount.nodeGroupSpecs[0]?.diskSizeGB as number : undefined,
-                                    clusterStatus: vCoreAccount.clusterStatus as string,
-                                    provisioningState: vCoreAccount.provisioningState as string                                });
+                            vCoreAccounts.map(vCoreAccount => {
+                                this.vCoreDetailsCache.set(nonNullProp(vCoreAccount, 'id'),
+                                    {
+                                        serverVersion: vCoreAccount.serverVersion as string,
+                                        sku: vCoreAccount.nodeGroupSpecs !== undefined
+                                            ? vCoreAccount.nodeGroupSpecs[0]?.sku as string : undefined,
+                                        location: vCoreAccount.location as string,
+                                        diskSize: vCoreAccount.nodeGroupSpecs !== undefined
+                                            ? vCoreAccount.nodeGroupSpecs[0]?.diskSizeGB as number : undefined,
+                                        clusterStatus: vCoreAccount.clusterStatus as string,
+                                        provisioningState: vCoreAccount.provisioningState as string
+                                    });
+                            });
+                        } catch (e) {
+                            console.error({ ...context, ...subContext });
+                            throw e;
+                        }
                     });
                 }
 
