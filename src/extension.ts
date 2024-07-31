@@ -38,6 +38,7 @@ import { TableAccountTreeItem } from './table/tree/TableAccountTreeItem';
 import { AttachedAccountSuffix } from './tree/AttachedAccountsTreeItem';
 import { SubscriptionTreeItem } from './tree/SubscriptionTreeItem';
 import { localize } from './utils/localize';
+import { VCoreExtension } from './vCore/VCoreExtension';
 
 const cosmosDBTopLevelContextValues: string[] = [GraphAccountTreeItem.contextValue, DocDBAccountTreeItem.contextValue, TableAccountTreeItem.contextValue, MongoAccountTreeItem.contextValue];
 
@@ -71,6 +72,11 @@ export async function activateInternal(context: vscode.ExtensionContext, perfSta
         registerGraphCommands();
         registerPostgresCommands();
         registerMongoCommands();
+
+        // init and activate vCore-support (commands, ...)
+        const vCoreSupport: VCoreExtension = new VCoreExtension();
+        context.subscriptions.push(vCoreSupport); // to be disposed when extension is deactivated.
+        await vCoreSupport.activate();
 
         context.subscriptions.push(vscode.workspace.registerFileSystemProvider(DatabasesFileSystem.scheme, ext.fileSystem));
 
