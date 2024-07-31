@@ -1115,7 +1115,7 @@
         "@azure/arm-resources": "^4.0.0",
         "@microsoft/eslint-config-azuretools": "^0.1.0",
         "@microsoft/vscode-azext-dev": "^2.0.2",
-        "@types/copy-webpack-plugin": "^6.4.0",
+        "@types/copy-webpack-plugin": "^10.1.0",
         "@types/documentdb": "^1.10.2",
         "@types/fs-extra": "^8.1.0",
         "@types/gulp": "^4.0.6",
@@ -1128,7 +1128,7 @@
         "@typescript-eslint/eslint-plugin": "^4.31.1",
         "@vscode/test-electron": "^2.3.8",
         "antlr4ts-cli": "^0.4.0-alpha.4",
-        "copy-webpack-plugin": "^6.4.0",
+        "copy-webpack-plugin": "^12.0.2",
         "eslint": "^7.19.0",
         "eslint-plugin-import": "^2.22.1",
         "glob": "^7.1.6",
@@ -1138,7 +1138,7 @@
         "mocha-junit-reporter": "^1.18.0",
         "mocha-multi-reporters": "^1.1.7",
         "ts-node": "^7.0.1",
-        "typescript": "^5.5.2",
+        "typescript": "^5.5.4",
         "vsce": "^1.87.0",
         "webpack": "^5.93.0",
         "webpack-cli": "^5.1.4",
@@ -1147,6 +1147,7 @@
     },
     "dependencies": {
         "@azure/arm-cosmosdb": "16.0.0-beta.7",
+        "@azure/arm-mongocluster": "1.0.0-beta.1",
         "@azure/arm-postgresql": "^6.0.0",
         "@azure/arm-postgresql-flexible": "^7.1.0",
         "@azure/cosmos": "^3.6.3",
@@ -1171,7 +1172,7 @@
         "vscode-languageserver": "^6.1.1",
         "vscode-languageserver-textdocument": "^1.0.1",
         "vscode-nls": "^4.0.0",
-        "vscode-uri": "^1.0.1"
+        "vscode-uri": "^3.0.8"
     },
     "extensionDependencies": [
         "ms-azuretools.vscode-azureresourcegroups"
