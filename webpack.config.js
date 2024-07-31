@@ -14,9 +14,6 @@ const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const dev = require("@microsoft/vscode-azext-dev");
 
-const outputPath = require('path').join(__dirname, 'out');
-
-
 let DEBUG_WEBPACK = !!process.env.DEBUG_WEBPACK;
 
 let config = dev.getDefaultWebpackConfig({
@@ -61,64 +58,5 @@ if (DEBUG_WEBPACK) {
     console.log('Config:', config);
 }
 
-let configWebviews = {
-    resolve: {
-        extensions: ['.js', '.ts', '.tsx'] // .js is neccesary for transitive imports
-    },
 
-    mode: "development",
-
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                exclude: /node_modules/,
-                use: [{
-                    loader: 'ts-loader',
-                    options: { transpileOnly: true }, // 4x speed increase, but no type checks.
-                }],
-            },
-            {
-                test: /\.s?css$/,
-                use: ['style-loader', 'css-loader', 'sass-loader'],
-            }
-        ]
-    },
-    devtool: 'source-map', // 'inline-source-map' hits breakpoints more reliability, but inflate file size.
-    output: {
-        filename: '[name].js', // Default, consider omitting.
-        path: outputPath,
-    },
-
-    entry: { panel: './src/vCore/views/collection/collection-widget.tsx' },
-
-    devServer: {
-        client: {
-            overlay: {
-                errors: true,
-                warnings: false, // Workaround for: "Module not found: Error: Can't resolve 'applicationinsights-native-metrics' in '.../node_modules/applicationinsights/out/AutoCollection'"
-            },
-        },
-        static: {
-            directory: outputPath, // Otherwise will default to /public
-        },
-        port: 8000
-    },
-
-    plugins: [
-        new webpack.ProvidePlugin({
-            React: 'react',
-        })
-    ],
-
-    stats: {
-        all: false,
-        assets: true,
-        builtAt: true,
-        errors: true,
-        performance: true,
-        timings: true,
-    }
-};
-
-module.exports = [config];
+module.exports = config;
