@@ -29,7 +29,7 @@
         {
             "label": "watch-src",
             "type": "npm",
-            "script": "compile",
+            "script": "watch:extension",
             "group": "build",
             "isBackground": true,
             "problemMatcher": [
@@ -50,7 +50,7 @@
         {
             "label": "devserver",
             "type": "npm",
-            "script": "webpack-serve-webviews",
+            "script": "serve:webviews",
             "group": "build",
             "isBackground": true,
             "problemMatcher": [
