@@ -1102,9 +1102,10 @@
         "test": "node ./out/test/runTest.js",
         "unittest": "mocha ./out/test/unit/**/*.js",
         "update-grammar": "antlr4ts -visitor ./grammar/mongo.g4 -o ./src/mongo/grammar",
-        "webpack": "npm run build && gulp webpack-dev",
-        "server": "webpack serve --mode development",
-        "webpack-prod": "npm run build && gulp webpack-prod",
+        "webpack": "npm run build && gulp webpack-dev && webpack --mode development --config ./webpack.config.webviews.js",
+        "webpack-webviews": "webpack --mode development --config ./webpack.config.webviews.js",
+        "webpack-serve-webviews": "webpack serve --mode development --config ./webpack.config.webviews.js",
+        "webpack-prod": "npm run build && gulp webpack-prod && webpack --mode production --config ./webpack.config.webviews.js",
         "webpack-profile": "webpack --profile --json --mode production > webpack-stats.json && echo Use http://webpack.github.io/analyse to analyze the stats",
         "all": "npm i && npm run lint && npm test",
         "prepare": "husky install",
@@ -1112,6 +1113,7 @@
         "link-resapi": "npm link @microsoft/vscode-azureresources-api"
     },
     "devDependencies": {
+        "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
         "@azure/arm-resources": "^4.0.0",
         "@microsoft/eslint-config-azuretools": "^0.1.0",
         "@microsoft/vscode-azext-dev": "^2.0.2",
@@ -1125,6 +1127,7 @@
         "@types/react": "^18.3.0",
         "@types/react-dom": "^18.3.0",
         "@types/vscode": "1.82.0",
+        "@types/vscode-webview": "^1.57.5",
         "@typescript-eslint/eslint-plugin": "^4.31.1",
         "@vscode/test-electron": "^2.3.8",
         "antlr4ts-cli": "^0.4.0-alpha.4",
@@ -1143,7 +1146,8 @@
         "webpack": "^5.93.0",
         "webpack-cli": "^5.1.4",
         "webpack-dev-server": "^5.0.4",
-        "webpack-log": "^3.0.2"
+        "webpack-log": "^3.0.2",
+        "swc-loader": "^0.2.6"
     },
     "dependencies": {
         "@azure/arm-cosmosdb": "16.0.0-beta.7",

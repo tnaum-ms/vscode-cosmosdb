@@ -21,5 +21,6 @@
         "mode": "internal",
         "listeners": true,
         "visitors": false
-    }
+    },
+    "sarif-viewer.connectToGithubCodeScanning": "off"
 }

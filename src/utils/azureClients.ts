@@ -15,6 +15,10 @@ export async function createCosmosDBClient(context: AzExtClientContext): Promise
     return createAzureClient(context, (await import('@azure/arm-cosmosdb')).CosmosDBManagementClient);
 }
 
+// export async function createvCoreClient(context: AzExtClientContext): Promise<MongoClusterManagementClient> {
+//     return createAzureClient(context, (await import('@azure/arm-mongocluster')).MongoClusterManagementClient);
+// }
+
 export async function createPostgreSQLClient(context: AzExtClientContext): Promise<PostgreSQLManagementClient> {
     return createAzureClient(context, (await import('@azure/arm-postgresql')).PostgreSQLManagementClient);
 }

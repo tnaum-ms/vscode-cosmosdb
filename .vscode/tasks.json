@@ -18,6 +18,54 @@
             "type": "npm",
             "script": "lint",
             "problemMatcher": "$eslint-stylish"
-        }
+        },
+        {
+            "label": "Watch Extension&Webview",
+            "dependsOn": [
+                "watch-src",
+                "devserver"
+            ]
+        },
+        {
+            "label": "watch-src",
+            "type": "npm",
+            "script": "compile",
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": [
+                "$tsc-watch",
+                "$ts-webpack-watch",
+                "$tslint-webpack-watch"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true,
+                "group": "vscode-cosmosdb-extension"
+            }
+        },
+        {
+            "label": "devserver",
+            "type": "npm",
+            "script": "webpack-serve-webviews",
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": [
+                "$ts-webpack-watch",
+                "$tslint-webpack-watch"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true,
+                "group": "vscode-cosmosdb-extension"
+            }
+        },
     ]
 }

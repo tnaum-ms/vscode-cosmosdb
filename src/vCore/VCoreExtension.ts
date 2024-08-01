@@ -14,7 +14,8 @@ import { MongoVCoreResolver } from '../resolver/MongoVCoreResolver';
 export class VCoreExtension implements vscode.Disposable {
 
     constructor() {
-        ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.MongoVCore, new MongoVCoreResolver());
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        ext.rgApi.registerApplicationResourceResolver(AzExtResourceType.MongoVCore as string, new MongoVCoreResolver());
     }
 
     async activate(): Promise<void> {
@@ -31,8 +32,8 @@ export class VCoreExtension implements vscode.Disposable {
     // commands
 
     commandSayHello(): void {
-        console.log(`Hello there!!!`);
-        void vscode.window.showInformationMessage('Saying hello!');
+        console.log(`Hello there here!!!`);
+        void vscode.window.showInformationMessage('Saying hello here!');
     }
 
     commandShowWebview(): void {
@@ -91,8 +92,8 @@ export class VCoreExtension implements vscode.Disposable {
 
 
 const getWebviewContentReact = () => {
-    const jsFile = "panel.js";
-    const localServerUrl = "http://localhost:8000"; //webpack
+    const jsFile = "webviews.js";
+    const localServerUrl = "http://localhost:18088"; //webpack
 
     const scriptUrl = `${localServerUrl}/${jsFile}`;
 
@@ -114,7 +115,13 @@ const getWebviewContentReact = () => {
         getting there
 		<div id="root"></div>
 
-		<script src="${scriptUrl}" />
+
+            <script type="module">
+            import { render } from "${scriptUrl}";
+            render(acquireVsCodeApi(), "'/static");
+            </script>
+
+
 	</body>
 	</html>`;
 }
