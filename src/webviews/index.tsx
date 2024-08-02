@@ -2,6 +2,16 @@
 import { createRoot } from 'react-dom/client';
 import { WebviewApi, WithWebviewContext } from './WebviewContext';
 
+// eslint-disable-next-line import/no-internal-modules
+import './vCore/my-styles.scss';
+
+const MyButton = () => {
+    return (
+        <button className="my-button">
+            Click me
+        </button>
+    );
+}
 
 export function render(vscodeApi: WebviewApi, publicPath: string, rootId = 'root'): void {
     const container = document.getElementById(rootId);
@@ -19,6 +29,7 @@ export function render(vscodeApi: WebviewApi, publicPath: string, rootId = 'root
     root.render(
         <WithWebviewContext vscodeApi={vscodeApi}>
             <button>yay from react</button>
+            <MyButton />
         </WithWebviewContext>,
     );
 }

@@ -1112,8 +1112,8 @@
         "webpack-profile": "webpack --profile --json --mode production > webpack-stats.json && echo Use http://webpack.github.io/analyse to analyze the stats",
         "all": "npm i && npm run lint && npm test",
         "prepare": "husky install",
-        "reset": "rm -rf out && rm -rf node_modules && npm install  && npm run link-resapi",
-        "link-resapi": "npm link @microsoft/vscode-azureresources-api"
+        "reset": "rimraf out node_modules dist && npm install  && npm run link:resapi",
+        "link:resapi": "npm link @microsoft/vscode-azureresources-api"
     },
     "devDependencies": {
         "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
@@ -1150,7 +1150,11 @@
         "webpack-cli": "^5.1.4",
         "webpack-dev-server": "^5.0.4",
         "webpack-log": "^3.0.2",
-        "swc-loader": "^0.2.6"
+        "swc-loader": "^0.2.6",
+        "sass": "^1.77.8",
+        "style-loader": "^4.0.0",
+        "css-loader": "^7.1.2",
+        "sass-loader": "^16.0.0"
     },
     "dependencies": {
         "@azure/arm-cosmosdb": "16.0.0-beta.7",

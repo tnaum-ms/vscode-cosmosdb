@@ -39,7 +39,11 @@ module.exports = (env, { mode }) => {
                 },
                 {
                     test: /\.s?css$/,
-                    use: ['style-loader', 'css-loader', 'sass-loader'],
+                    use: [
+                        'style-loader', // Injects styles into the DOM
+                        'css-loader',   // Resolves @import and url() paths
+                        'sass-loader'   // Compiles Sass to CS
+                    ],
                 }
             ],
         },
