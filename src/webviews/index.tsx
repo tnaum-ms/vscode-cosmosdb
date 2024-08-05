@@ -1,17 +1,14 @@
 // eslint-disable-next-line import/no-internal-modules
 import { createRoot } from 'react-dom/client';
 import { WebviewApi, WithWebviewContext } from './WebviewContext';
+import { CollectionView } from './vCore/collectionView';
 
-// eslint-disable-next-line import/no-internal-modules
-import './vCore/my-styles.scss';
+export const Views = {
+    1: CollectionView,
+} as const;
 
-const MyButton = () => {
-    return (
-        <button className="my-button">
-            Click me
-        </button>
-    );
-}
+export type ViewKey = keyof typeof Views;
+
 
 export function render(vscodeApi: WebviewApi, publicPath: string, rootId = 'root'): void {
     const container = document.getElementById(rootId);
@@ -24,12 +21,13 @@ export function render(vscodeApi: WebviewApi, publicPath: string, rootId = 'root
     // @ts-ignore
     __webpack_public_path__ = publicPath;
 
+    const Component: React.ComponentType = Views[1];
+
     const root = createRoot(container);
 
     root.render(
         <WithWebviewContext vscodeApi={vscodeApi}>
-            <button>yay from react</button>
-            <MyButton />
+            <Component />
         </WithWebviewContext>,
     );
 }
