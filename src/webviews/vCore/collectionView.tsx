@@ -2,7 +2,9 @@
 import { JSX } from 'react';
 import './my-styles.scss';
 
-import { Button } from '@fluentui/react-components';
+import { Button, Input } from '@fluentui/react-components';
+import { PlayRegular, SearchFilled } from "@fluentui/react-icons";
+
 
 const MyButton = (): JSX.Element => {
     return (
@@ -22,7 +24,8 @@ export const CollectionView = (): JSX.Element => {
                 <div>yay</div>
             </div>
             < div style={{ display: 'flex', margin: 50 }}>
-                <Button appearance="primary">Fluent UI 9</Button>
+                <Input contentBefore={<SearchFilled />} />
+                <Button icon={<PlayRegular />} appearance="primary">Run Find Query</Button>
             </div>
         </div>
     );
