@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { WebviewApi, WithWebviewContext } from './WebviewContext';
 import { CollectionView } from './vCore/collectionView';
 
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import { FluentProvider } from '@fluentui/react-components';
+import { themeLight } from './theme-generator';
 
 
 export const Views = {
@@ -28,8 +29,10 @@ export function render(vscodeApi: WebviewApi, publicPath: string, rootId = 'root
 
     const root = createRoot(container);
 
+    // add theme change listener to vscode and swap themeLight/themeDark. later add "high contrast" theme
+
     root.render(
-        <FluentProvider theme={webLightTheme}>
+        <FluentProvider theme={themeLight}>
             <WithWebviewContext vscodeApi={vscodeApi}>
                 <Component />
             </WithWebviewContext>
