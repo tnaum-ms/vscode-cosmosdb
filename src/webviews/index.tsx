@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { WebviewApi, WithWebviewContext } from './WebviewContext';
 import { CollectionView } from './vCore/collectionView';
 
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+
+
 export const Views = {
     1: CollectionView,
 } as const;
@@ -26,8 +29,10 @@ export function render(vscodeApi: WebviewApi, publicPath: string, rootId = 'root
     const root = createRoot(container);
 
     root.render(
-        <WithWebviewContext vscodeApi={vscodeApi}>
-            <Component />
-        </WithWebviewContext>,
+        <FluentProvider theme={webLightTheme}>
+            <WithWebviewContext vscodeApi={vscodeApi}>
+                <Component />
+            </WithWebviewContext>
+        </FluentProvider>
     );
 }
