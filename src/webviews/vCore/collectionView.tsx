@@ -1,9 +1,10 @@
 // eslint-disable-next-line import/no-internal-modules
 import { JSX } from 'react';
+import './collectionView.scss';
 import './my-styles.scss';
 
-import { Avatar, Badge, Body1, Button, Caption2, Checkbox, Dropdown, Input, makeStyles, Menu, MenuButton, MenuItemCheckbox, MenuList, MenuPopover, MenuTrigger, Option, Radio, RadioGroup, shorthands, Slider, Switch, Tab, TabList, Title3, tokens, useId } from '@fluentui/react-components';
-import { bundleIcon, CalendarLtrFilled, CalendarLtrRegular, ChevronRightRegular, ClipboardPasteFilled, ClipboardPasteRegular, CutFilled, CutRegular, EditFilled, EditRegular, MeetNowFilled, MeetNowRegular, PlayRegular, SearchFilled, SearchRegular } from "@fluentui/react-icons";
+import { Avatar, Badge, Button, Caption2, Checkbox, Dropdown, Input, makeStyles, Menu, MenuButton, MenuItemCheckbox, MenuList, MenuPopover, MenuTrigger, Option, Radio, RadioGroup, shorthands, Slider, Switch, Tab, TabList, tokens, Toolbar, ToolbarButton, ToolbarDivider, Tooltip, useId } from '@fluentui/react-components';
+import { ArrowClockwiseFilled, ArrowLeftFilled, ArrowPreviousFilled, ArrowRightFilled, bundleIcon, CalendarLtrFilled, CalendarLtrRegular, ChevronRightRegular, ClipboardPasteFilled, ClipboardPasteRegular, CutFilled, CutRegular, DocumentAddRegular, DocumentArrowDownRegular, DocumentDismissRegular, DocumentEditRegular, EditFilled, EditRegular, MeetNowFilled, MeetNowRegular, PlayRegular, SearchFilled, SearchRegular } from "@fluentui/react-icons";
 
 
 const useStyles = makeStyles({
@@ -71,11 +72,6 @@ export const Column1 = (): JSX.Element => {
     return (
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         <div>
-            <Title3 block>Make an impression</Title3>
-            <Body1 block>
-                Make a big impression with this clean, modern, and mobile-friendly site. Use it to communicate information to
-                people inside or outside your team. Share your ideas, results, and more in this visually compelling format.
-            </Body1>
             <div className={styles.avatar}>
                 <Avatar
                     color="brand"
@@ -189,30 +185,154 @@ export const Column3 = (): JSX.Element => {
     );
 };
 
-const MyButton = (): JSX.Element => {
-    return (
-        <button className="my-button">
-            We're react!
-        </button>
-    );
-}
 
 export const CollectionView = (): JSX.Element => {
     const styles = useStyles();
 
-    return (
-        <div>
-            <div style={{ display: 'flex' }}>
-                <MyButton />
-            </div>
-            <div style={{ display: 'flex', marginTop: 10 }}>
-                <div>yay</div>
-            </div>
-            < div style={{ display: 'flex', margin: 50 }}>
-                <Input contentBefore={<SearchFilled />} />
-                <Button icon={<PlayRegular />} appearance="primary">Run Find Query</Button>
-            </div>
 
+    return (
+        <div className='webview'>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+                    <Input contentBefore={<SearchFilled />} style={{ flexGrow: 1 }} />
+                    <Button icon={<PlayRegular />} appearance="primary" style={{ flexShrink: 0 }}>Run Find Query</Button>
+                </div>
+                <div className='row-separator'></div>
+                <div className='toolbar'>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        gap: '10px'
+                    }}>
+                        <Toolbar aria-label="with Popover" size="small">
+
+                            <Tooltip
+                                content="Reload query results"
+                                relationship="description"
+                                withArrow
+                            >
+                                <ToolbarButton
+                                    aria-label="Refresh"
+                                    icon={< ArrowClockwiseFilled />}
+                                />
+                            </Tooltip>
+
+                            <ToolbarDivider />
+
+                            <Tooltip
+                                content="Go to first page"
+                                relationship="description"
+                                withArrow
+                            >
+                                <ToolbarButton
+                                    aria-label="Go to start"
+                                    icon={< ArrowPreviousFilled />}
+                                />
+                            </Tooltip>
+
+                            <Tooltip
+                                content="Go to previous page"
+                                relationship="description"
+                                withArrow
+                            >
+                                <ToolbarButton
+                                    aria-label="Go to previous page"
+                                    icon={< ArrowLeftFilled />}
+                                />
+                            </Tooltip>
+
+                            <Tooltip
+                                content="Go to next page"
+                                relationship="description"
+                                withArrow
+                            >
+                                <ToolbarButton
+                                    aria-label="Go to next page"
+                                    icon={< ArrowRightFilled />}
+                                />
+                            </Tooltip>
+
+                            <Tooltip
+                                content="Change page size"
+                                relationship="description"
+                                withArrow
+                            >
+                                <Dropdown
+                                    style={{ minWidth: '100px' }}
+                                    defaultValue="50"
+                                    defaultSelectedOptions={["50"]}
+                                >
+                                    <Option key="10">
+                                        10
+                                    </Option>
+                                    <Option key="10">
+                                        50
+                                    </Option>
+                                    <Option key="100">
+                                        100
+                                    </Option>
+                                    <Option key="500">
+                                        500
+                                    </Option>
+                                </Dropdown>
+                            </Tooltip>
+
+
+
+                        </Toolbar>
+
+
+
+
+                        <Toolbar aria-label="with Popover" size="small">
+
+                            <ToolbarButton
+                                aria-label="Add new document"
+                                icon={< DocumentAddRegular />}
+                            />
+
+                            <ToolbarButton
+                                aria-label="View selected document"
+                                icon={< DocumentArrowDownRegular />}
+                            />
+
+                            <ToolbarButton
+                                aria-label="Edit selected document"
+                                icon={< DocumentEditRegular />}
+                            />
+
+                            <ToolbarButton
+                                aria-label="Delete selected document"
+                                icon={< DocumentDismissRegular />}
+                            />
+
+
+                        </Toolbar>
+
+                        <Dropdown style={{ minWidth: '150px' }}
+                            defaultValue="Table View"
+                            defaultSelectedOptions={["table"]}
+                        >
+                            <Option key="table">
+                                Table View
+                            </Option>
+                            <Option key="tree">
+                                Tree View
+                            </Option>
+                            <Option key="json">
+                                JSON View
+                            </Option>
+                        </Dropdown>
+
+                    </div>
+                </div>
+            </div >
+
+            <div style={{ display: 'flex', marginTop: 10 }}>
+                <div><br /><br /><br /><br /><br /></div>
+            </div>
 
 
             <div className={styles.root}>
@@ -224,7 +344,7 @@ export const CollectionView = (): JSX.Element => {
             </div>
 
 
-        </div>
+        </div >
 
 
     );
