@@ -6,7 +6,7 @@
 import { uiUtils } from "@microsoft/vscode-azext-azureutils";
 import { IActionContext, ISubscriptionContext, callWithTelemetryAndErrorHandling, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { AppResource, AppResourceResolver } from "@microsoft/vscode-azext-utils/hostapi";
-import { createCosmosDBClient } from "../utils/azureClients";
+import { createvCoreClient } from "../utils/azureClients";
 import { IMongoVCoreAccountDetails, ResolvedMongoVCoreAccountResource } from "./ResolvedMongoVCoreAccountResource";
 
 
@@ -43,7 +43,8 @@ export class MongoVCoreResolver implements AppResourceResolver {
                  * However, the 'resolveResource' functions is declared as async, so can it be called in parallel?
                  * If so, there is a problem here. JS/TS and race conditions? Is this a thing?
                  */
-                if (this.vCoreDetailsCacheUpdateRequested) {
+                // eslint-disable-next-line no-constant-condition
+                if (this.vCoreDetailsCacheUpdateRequested && false) { // disabling for a sec, something is broken with the backend
                     await callWithTelemetryAndErrorHandling('vCore.resolveResources.cacheUpdate', async (context: IActionContext) => {
                         try {
                             this.vCoreDetailsCacheUpdateRequested = false;
@@ -53,7 +54,7 @@ export class MongoVCoreResolver implements AppResourceResolver {
                                 this.vCoreDetailsCacheUpdateRequested = true;
                             }, 1000 * 10); // clear cache after 10 seconds == keep cache for 10 seconds
 
-                            const vCoreManagementClient = await createCosmosDBClient({ ...context, ...subContext });
+                            const vCoreManagementClient = await createvCoreClient({ ...context, ...subContext });
                             const vCoreAccounts = await uiUtils.listAllIterator(vCoreManagementClient.mongoClusters.list());
 
                             vCoreAccounts.map(vCoreAccount => {
